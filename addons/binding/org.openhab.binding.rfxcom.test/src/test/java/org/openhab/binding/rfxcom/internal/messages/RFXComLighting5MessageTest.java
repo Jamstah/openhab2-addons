@@ -8,10 +8,12 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import static org.junit.Assert.assertEquals;
+import static org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType.LIGHTING5;
+
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
-import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 /**
  * Test for RFXCom-binding
@@ -21,13 +23,21 @@ import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType
  */
 public class RFXComLighting5MessageTest {
     @Test
-    public void checkForSupportTest() throws RFXComException, RFXComNotImpException {
-        RFXComMessageFactory.createMessage(PacketType.LIGHTING5);
+    public void checkForSupportTest() throws RFXComException, RFXComMessageNotImplementedException {
+        RFXComMessageFactory.createMessage(LIGHTING5);
     }
 
     @Test
-    public void basicBoundaryCheck() throws RFXComException, RFXComNotImpException {
-        RFXComTestHelper.basicBoundaryCheck(PacketType.LIGHTING5);
+    public void basicBoundaryCheck() throws RFXComException, RFXComMessageNotImplementedException {
+        RFXComLighting5Message intf = (RFXComLighting5Message) RFXComMessageFactory.createMessage(LIGHTING5);
+
+        // This is a place where its easy to make mistakes in coding, and can result in errors, normally
+        // array bounds errors
+        intf.subType = RFXComLighting5Message.SubType.LIGHTWAVERF;
+        intf.command = RFXComLighting5Message.Commands.ON;
+        byte[] message = intf.decodeMessage();
+        assertEquals("Wrong packet length", message[0], message.length - 1);
+        assertEquals("Wrong packet type", LIGHTING5.toByte(), message[1]);
     }
 
     // TODO please add tests for real messages

@@ -31,7 +31,7 @@ import org.openhab.binding.rfxcom.internal.connector.RFXComJD2XXConnector;
 import org.openhab.binding.rfxcom.internal.connector.RFXComSerialConnector;
 import org.openhab.binding.rfxcom.internal.connector.RFXComTcpConnector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage;
 import org.openhab.binding.rfxcom.internal.messages.RFXComInterfaceMessage;
 import org.openhab.binding.rfxcom.internal.messages.RFXComInterfaceMessage.Commands;
@@ -351,9 +351,6 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
 
                     case NAK:
                     case NAK_INVALID_AC_ADDRESS:
-                    case UNKNOWN:
-                        logger.error("Command transmit failed, '{}' received", resp.response);
-                        break;
                 }
             } else {
                 logger.warn("No response received from transceiver");
@@ -404,7 +401,7 @@ public class RFXComBridgeHandler extends BaseBridgeHandler {
                         }
                     }
                 }
-            } catch (RFXComNotImpException e) {
+            } catch (RFXComMessageNotImplementedException e) {
                 logger.debug("Message not supported, data: {}", DatatypeConverter.printHexBinary(packet));
             } catch (RFXComException e) {
                 logger.error("Error occured during packet receiving, data: {}, cause: {}",

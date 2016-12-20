@@ -15,7 +15,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 /**
  * Test for RFXCom-binding
@@ -26,7 +26,7 @@ import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
 public class RFXComRainMessageTest {
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         String hexMessage = "0B550217B6000000004D3C69";
         byte[] message = DatatypeConverter.parseHexBinary(hexMessage);
         RFXComRainMessage msg = (RFXComRainMessage) RFXComMessageFactory.createMessage(message);

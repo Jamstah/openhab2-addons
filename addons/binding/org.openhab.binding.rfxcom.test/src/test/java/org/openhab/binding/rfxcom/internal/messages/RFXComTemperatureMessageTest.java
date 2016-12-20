@@ -10,7 +10,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -25,7 +25,7 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComTemperatureMess
  */
 public class RFXComTemperatureMessageTest {
     private void testMessage(String hexMsg, RFXComTemperatureMessage.SubType subType, int seqNbr, String deviceId,
-            double temperature, int signalLevel, int bateryLevel) throws RFXComException, RFXComNotImpException {
+            double temperature, int signalLevel, int bateryLevel) throws RFXComException, RFXComMessageNotImplementedException {
         final RFXComTemperatureMessage msg = (RFXComTemperatureMessage) RFXComMessageFactory
                 .createMessage(DatatypeConverter.parseHexBinary(hexMsg));
         assertEquals("SubType", subType, msg.subType);
@@ -41,7 +41,7 @@ public class RFXComTemperatureMessageTest {
     }
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         testMessage("08500110000180BC69", TEMP1, 16, "1", -18.8d, 6, 9);
         testMessage("0850021DFB0100D770", TEMP2, 29, "64257", 21.5d, 7, 0);
         testMessage("08500502770000D389", TEMP5, 2, "30464", 21.1d, 8, 9);

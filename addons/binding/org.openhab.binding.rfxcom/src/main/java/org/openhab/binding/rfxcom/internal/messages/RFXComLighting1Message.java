@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.smarthome.core.library.items.ContactItem;
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.SwitchItem;
@@ -19,9 +22,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for lighting1 message. See X10, ARC, etc..
@@ -43,9 +44,7 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
         ENERGENIE(8),
         ENERGENIE_5(9),
         COCO(10),
-        HQ_COCO20(11),
-
-        UNKNOWN(255);
+        HQ_COCO20(11);
 
         private final int subType;
 
@@ -61,14 +60,14 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -79,9 +78,7 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
         BRIGHT(3),
         GROUP_OFF(5),
         GROUP_ON(6),
-        CHIME(7),
-
-        UNKNOWN(255);
+        CHIME(7);
 
         private final int command;
 
@@ -97,14 +94,14 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
             return (byte) command;
         }
 
-        public static Commands fromByte(int input) {
+        public static Commands fromByte(int input) throws RFXComUnknownValueException {
             for (Commands c : Commands.values()) {
                 if (c.command == input) {
                     return c;
                 }
             }
 
-            return Commands.UNKNOWN;
+            throw new RFXComUnknownValueException(Commands.class, String.valueOf(input));
         }
     }
 
@@ -114,10 +111,10 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays
             .asList(RFXComValueSelector.COMMAND);
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public char houseCode = 'A';
     public byte unitCode = 0;
-    public Commands command = Commands.UNKNOWN;
+    public Commands command;
     public byte signalLevel = 0;
     public boolean group = false;
 
@@ -125,7 +122,7 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
         packetType = PacketType.LIGHTING1;
     }
 
-    public RFXComLighting1Message(byte[] data) {
+    public RFXComLighting1Message(byte[] data) throws RFXComException {
 
         encodeMessage(data);
     }
@@ -144,7 +141,7 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -323,9 +320,9 @@ public class RFXComLighting1Message extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

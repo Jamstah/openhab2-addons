@@ -13,24 +13,23 @@ package org.openhab.binding.rfxcom.internal.exceptions;
  *
  * @author Pauli Anttila - Initial contribution
  */
-public class RFXComNotImpException extends Exception {
+public class RFXComMessageNotImplementedException extends RFXComException {
 
     private static final long serialVersionUID = 5958462009164173495L;
 
-    public RFXComNotImpException() {
+    public RFXComMessageNotImplementedException() {
         super();
     }
 
-    public RFXComNotImpException(String message) {
+    public RFXComMessageNotImplementedException(String message) {
         super(message);
     }
 
-    public RFXComNotImpException(String message, Throwable cause) {
+    public RFXComMessageNotImplementedException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public RFXComNotImpException(Throwable cause) {
+    public RFXComMessageNotImplementedException(Throwable cause) {
         super(cause);
     }
-
 }

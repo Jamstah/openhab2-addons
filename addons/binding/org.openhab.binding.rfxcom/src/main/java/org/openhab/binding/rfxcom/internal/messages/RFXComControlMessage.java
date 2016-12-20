@@ -26,7 +26,7 @@ public class RFXComControlMessage extends RFXComBaseMessage {
 
     }
 
-    public RFXComControlMessage(byte[] data) {
+    public RFXComControlMessage(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -36,7 +36,7 @@ public class RFXComControlMessage extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
         super.encodeMessage(data);
     }
 

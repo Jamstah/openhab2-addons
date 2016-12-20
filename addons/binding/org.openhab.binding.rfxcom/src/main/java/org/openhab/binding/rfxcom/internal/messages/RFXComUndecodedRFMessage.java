@@ -23,6 +23,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageTooLongException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for undecoded messages.
@@ -56,9 +57,7 @@ public class RFXComUndecodedRFMessage extends RFXComBaseMessage {
         RGB(0x13),
         RTS(0x14),
         SELECT_PLUS(0x15),
-        HOME_CONFORT(0x16),
-
-        UNKNOWN(0xFF);
+        HOME_CONFORT(0x16);
 
         private final int subType;
 
@@ -74,14 +73,14 @@ public class RFXComUndecodedRFMessage extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -90,14 +89,14 @@ public class RFXComUndecodedRFMessage extends RFXComBaseMessage {
 
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays.asList();
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public byte[] rawPayload = new byte[0];
 
     public RFXComUndecodedRFMessage() {
         packetType = UNDECODED_RF_MESSAGE;
     }
 
-    public RFXComUndecodedRFMessage(byte[] message) {
+    public RFXComUndecodedRFMessage(byte[] message) throws RFXComException {
         encodeMessage(message);
     }
 
@@ -115,7 +114,7 @@ public class RFXComUndecodedRFMessage extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] message) {
+    public void encodeMessage(byte[] message) throws RFXComException {
 
         super.encodeMessage(message);
 
@@ -189,9 +188,9 @@ public class RFXComUndecodedRFMessage extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

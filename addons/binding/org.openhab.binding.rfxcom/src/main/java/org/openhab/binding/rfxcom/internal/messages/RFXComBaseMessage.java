@@ -10,6 +10,9 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import javax.xml.bind.DatatypeConverter;
 
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
+
 /**
  * Base class for RFXCOM data classes. All other data classes should extend this class.
  *
@@ -62,9 +65,7 @@ public abstract class RFXComBaseMessage implements RFXComMessage {
         RFXSENSOR(112),
         RFXMETER(113),
         FS20(114),
-        IO_LINES(128),
-
-        UNKNOWN(255);
+        IO_LINES(128);
 
         private final int packetType;
 
@@ -80,20 +81,20 @@ public abstract class RFXComBaseMessage implements RFXComMessage {
             return (byte) packetType;
         }
 
-        public static PacketType fromByte(int input) {
+        public static PacketType fromByte(int input) throws RFXComUnknownValueException {
             for (PacketType packetType : PacketType.values()) {
                 if (packetType.packetType == input) {
                     return packetType;
                 }
             }
 
-            return PacketType.UNKNOWN;
+            throw new RFXComUnknownValueException(PacketType.class, String.valueOf(input));
         }
 
     }
 
     public byte[] rawMessage;
-    public PacketType packetType = PacketType.UNKNOWN;
+    public PacketType packetType;
     public byte packetId = 0;
     public byte subType = 0;
     public byte seqNbr = 0;
@@ -104,12 +105,12 @@ public abstract class RFXComBaseMessage implements RFXComMessage {
 
     }
 
-    public RFXComBaseMessage(byte[] data) {
+    public RFXComBaseMessage(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         rawMessage = data;
 

@@ -10,7 +10,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -25,7 +25,7 @@ import static org.openhab.binding.rfxcom.internal.messages.RFXComWindMessage.Sub
  */
 public class RFXComWindMessageTest {
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         String hexMessage = "105601122F000087000000140000000079";
         byte[] message = DatatypeConverter.parseHexBinary(hexMessage);
         RFXComWindMessage msg = (RFXComWindMessage) RFXComMessageFactory.createMessage(message);

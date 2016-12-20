@@ -8,13 +8,14 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.Type;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.io.UnsupportedEncodingException;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for interface message.
@@ -29,9 +30,7 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
         NO_EXTENDED_HW_PRESENT(2),
         LIST_RFY_REMOTES(3),
         LIST_ASA_REMOTES(4),
-        START_RECEIVER(7),
-
-        UNKNOWN(255);
+        START_RECEIVER(7);
 
         private final int subType;
 
@@ -47,14 +46,14 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType subType : SubType.values()) {
                 if (subType.subType == input) {
                     return subType;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -67,9 +66,7 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
         SAVE_RECEIVING_MODES(6), // Save receiving modes of the receiver/transceiver in non-volatile memory
         START_RECEIVER(7), // Start RFXtrx receiver
         T1(8), // For internal use by RFXCOM
-        T2(9), // For internal use by RFXCOM
-
-        UNKNOWN(255);
+        T2(9); // For internal use by RFXCOM
 
         private final int command;
 
@@ -85,14 +82,14 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
             return (byte) command;
         }
 
-        public static Commands fromByte(int input) {
+        public static Commands fromByte(int input) throws RFXComUnknownValueException {
             for (Commands command : Commands.values()) {
                 if (command.command == input) {
                     return command;
                 }
             }
 
-            return Commands.UNKNOWN;
+            throw new RFXComUnknownValueException(Commands.class, String.valueOf(input));
         }
     }
 
@@ -107,9 +104,7 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
         _868_30MHZ_FSK(88),
         _868_35MHZ(89),
         _868_35MHZ_FSK(90),
-        _868_95MHZ_FSK(91),
-
-        UNKNOWN(255);
+        _868_95MHZ_FSK(91);
 
         private final int type;
 
@@ -125,22 +120,22 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
             return (byte) type;
         }
 
-        public static TransceiverType fromByte(int input) {
+        public static TransceiverType fromByte(int input) throws RFXComUnknownValueException {
             for (TransceiverType type : TransceiverType.values()) {
                 if (type.type == input) {
                     return type;
                 }
             }
 
-            return TransceiverType.UNKNOWN;
+            throw new RFXComUnknownValueException(TransceiverType.class, String.valueOf(input));
         }
     }
 
-    public SubType subType = SubType.UNKNOWN;
-    public Commands command = Commands.UNKNOWN;
+    public SubType subType;
+    public Commands command;
     public String text = "";
 
-    public TransceiverType transceiverType = TransceiverType.UNKNOWN;
+    public TransceiverType transceiverType;
     public int firmwareVersion = 0;
 
     public boolean enableUndecodedPackets = false; // 0x80 - Undecoded packets
@@ -177,7 +172,7 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
 
     }
 
-    public RFXComInterfaceMessage(byte[] data) {
+    public RFXComInterfaceMessage(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -228,7 +223,7 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -371,9 +366,9 @@ public class RFXComInterfaceMessage extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

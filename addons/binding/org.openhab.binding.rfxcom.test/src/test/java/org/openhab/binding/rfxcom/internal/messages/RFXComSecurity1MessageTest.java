@@ -10,7 +10,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertEquals;
 public class RFXComSecurity1MessageTest {
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         String hexMessage = "0820004DD3DC540089";
         byte[] message = DatatypeConverter.parseHexBinary(hexMessage);
         RFXComSecurity1Message msg = (RFXComSecurity1Message) RFXComMessageFactory.createMessage(message);

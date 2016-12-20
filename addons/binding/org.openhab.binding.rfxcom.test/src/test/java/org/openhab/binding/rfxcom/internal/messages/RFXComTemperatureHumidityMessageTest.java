@@ -10,7 +10,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComTemperatureHumidityMessage.HumidityStatus;
 
 import javax.xml.bind.DatatypeConverter;
@@ -33,7 +33,7 @@ public class RFXComTemperatureHumidityMessageTest {
 
     private void testMessage(String hexMsg, RFXComTemperatureHumidityMessage.SubType subType, int seqNbr, int sensorId,
             double temperature, int humidity, HumidityStatus humidityStatus, int signalLevel, int batteryLevel)
-            throws RFXComException, RFXComNotImpException {
+            throws RFXComException, RFXComMessageNotImplementedException {
         byte[] binaryMessage = DatatypeConverter.parseHexBinary(hexMsg);
         final RFXComTemperatureHumidityMessage msg = (RFXComTemperatureHumidityMessage) RFXComMessageFactory
                 .createMessage(binaryMessage);
@@ -52,7 +52,7 @@ public class RFXComTemperatureHumidityMessageTest {
     }
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         testMessage("0A5201800F0201294C0349", TH1, 128, 3842, 29.7, 76, WET, 4, 9);
         testMessage("0A520211700200A72D0089", TH2, 17, 28674, 16.7, 45, NORMAL, 8, 9);
         testMessage("0A5205D42F000082590379", TH5, 212, 12032, 13, 89, WET, 7, 9);

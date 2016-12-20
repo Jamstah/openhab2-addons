@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
 
 public class RFXComMessageFactory {
@@ -99,7 +99,7 @@ public class RFXComMessageFactory {
     public final static byte[] CMD_START_RECEIVER = new byte[] { 0x0D, 0x00, 0x00, 0x03, 0x07, 0x00, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x00, 0x00, 0x00 };
 
-    public static RFXComMessage createMessage(PacketType packetType) throws RFXComException, RFXComNotImpException {
+    public static RFXComMessage createMessage(PacketType packetType) throws RFXComException, RFXComMessageNotImplementedException {
 
         try {
             String className = messageClasses.get(packetType);
@@ -107,26 +107,24 @@ public class RFXComMessageFactory {
             return (RFXComMessage) cl.newInstance();
 
         } catch (ClassNotFoundException e) {
-            throw new RFXComNotImpException("Message " + packetType + " not implemented", e);
+            throw new RFXComMessageNotImplementedException("Message " + packetType + " not implemented", e);
 
         } catch (Exception e) {
             throw new RFXComException(e);
         }
     }
 
-    public static RFXComMessage createMessage(byte[] packet) throws RFXComException, RFXComNotImpException {
+    public static RFXComMessage createMessage(byte[] packet) throws RFXComException, RFXComMessageNotImplementedException {
 
-        PacketType packetType = getPacketType(packet[1]);
+        PacketType packetType = PacketType.fromByte(packet[1]);
 
         try {
             String className = messageClasses.get(packetType);
             Class<?> cl = Class.forName(classUrl + className);
             Constructor<?> c = cl.getConstructor(byte[].class);
             return (RFXComMessage) c.newInstance(packet);
-
         } catch (ClassNotFoundException e) {
-            throw new RFXComNotImpException("Message " + packetType + " not implemented, exception: ", e);
-
+            throw new RFXComMessageNotImplementedException("Message " + packetType + " not implemented, exception: ", e);
         } catch (Exception e) {
             throw new RFXComException(e);
         }
@@ -141,15 +139,5 @@ public class RFXComMessageFactory {
         }
 
         throw new IllegalArgumentException("Unknown packet type " + packetType);
-    }
-
-    private static PacketType getPacketType(byte packetType) {
-        for (PacketType p : PacketType.values()) {
-            if (p.toByte() == packetType) {
-                return p;
-            }
-        }
-
-        return PacketType.UNKNOWN;
     }
 }

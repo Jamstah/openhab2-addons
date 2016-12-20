@@ -10,7 +10,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComLighting1Message.Commands;
 
 import javax.xml.bind.DatatypeConverter;
@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 public class RFXComLighting1MessageTest {
 
     private void testMessage(String hexMsg, RFXComLighting1Message.SubType subType, int seqNbr, String deviceId,
-            byte signalLevel, RFXComLighting1Message.Commands command) throws RFXComException, RFXComNotImpException {
+            byte signalLevel, RFXComLighting1Message.Commands command) throws RFXComException, RFXComMessageNotImplementedException {
         final RFXComLighting1Message msg = (RFXComLighting1Message) RFXComMessageFactory
                 .createMessage(DatatypeConverter.parseHexBinary(hexMsg));
         assertEquals("SubType", subType, msg.subType);
@@ -41,7 +41,7 @@ public class RFXComLighting1MessageTest {
     }
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         testMessage("0710015242080780", RFXComLighting1Message.SubType.ARC, 82, "B.8", (byte) 8, Commands.CHIME);
 
         testMessage("0710010047010070", RFXComLighting1Message.SubType.ARC, 0, "G.1", (byte) 7, Commands.OFF);

@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.RollershutterItem;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -19,9 +22,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for curtain1 message. See Harrison.
@@ -32,9 +33,7 @@ import java.util.List;
 public class RFXComCurtain1Message extends RFXComBaseMessage {
 
     public enum SubType {
-        HARRISON(0),
-
-        UNKNOWN(255);
+        HARRISON(0);
 
         private final int subType;
 
@@ -50,14 +49,14 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -65,9 +64,7 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
         OPEN(0),
         CLOSE(1),
         STOP(2),
-        PROGRAM(3),
-
-        UNKNOWN(255);
+        PROGRAM(3);
 
         private final int command;
 
@@ -83,14 +80,14 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
             return (byte) command;
         }
 
-        public static Commands fromByte(int input) {
+        public static Commands fromByte(int input) throws RFXComUnknownValueException {
             for (Commands c : Commands.values()) {
                 if (c.command == input) {
                     return c;
                 }
             }
 
-            return Commands.UNKNOWN;
+            throw new RFXComUnknownValueException(Commands.class, String.valueOf(input));
         }
     }
 
@@ -100,10 +97,10 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays
             .asList(RFXComValueSelector.SHUTTER);
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public char sensorId = 'A';
     public byte unitCode = 0;
-    public Commands command = Commands.UNKNOWN;
+    public Commands command;
     public byte signalLevel = 0;
     public byte batteryLevel = 0;
 
@@ -111,7 +108,7 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
         packetType = PacketType.CURTAIN1;
     }
 
-    public RFXComCurtain1Message(byte[] data) {
+    public RFXComCurtain1Message(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -130,7 +127,7 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -266,9 +263,9 @@ public class RFXComCurtain1Message extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

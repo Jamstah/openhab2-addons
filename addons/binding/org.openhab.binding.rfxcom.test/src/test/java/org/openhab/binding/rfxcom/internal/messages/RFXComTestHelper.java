@@ -11,7 +11,7 @@ package org.openhab.binding.rfxcom.internal.messages;
 import static org.junit.Assert.assertEquals;
 
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
 
 /**
@@ -21,7 +21,7 @@ import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType
  * @since 1.9.0
  */
 public class RFXComTestHelper {
-    static void basicBoundaryCheck(PacketType packetType) throws RFXComException, RFXComNotImpException {
+    static void basicBoundaryCheck(PacketType packetType) throws RFXComException, RFXComMessageNotImplementedException {
         RFXComMessage intf = RFXComMessageFactory.createMessage(packetType);
 
         // This is a place where its easy to make mistakes in coding, and can result in errors, normally

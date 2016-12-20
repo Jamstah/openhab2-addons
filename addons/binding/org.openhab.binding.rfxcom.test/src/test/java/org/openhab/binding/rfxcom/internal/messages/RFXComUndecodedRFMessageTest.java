@@ -14,8 +14,9 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.junit.Test;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageNotImplementedException;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComMessageTooLongException;
-import org.openhab.binding.rfxcom.internal.exceptions.RFXComNotImpException;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType;
 
 /**
@@ -28,7 +29,7 @@ import org.openhab.binding.rfxcom.internal.messages.RFXComBaseMessage.PacketType
 public class RFXComUndecodedRFMessageTest {
 
     private void testMessage(String hexMsg, RFXComUndecodedRFMessage.SubType subType, int seqNbr, String rawPayload)
-            throws RFXComException, RFXComNotImpException {
+            throws RFXComException, RFXComMessageNotImplementedException {
         final RFXComUndecodedRFMessage msg = (RFXComUndecodedRFMessage) RFXComMessageFactory
                 .createMessage(DatatypeConverter.parseHexBinary(hexMsg));
         assertEquals("SubType", subType, msg.subType);
@@ -42,12 +43,12 @@ public class RFXComUndecodedRFMessageTest {
     }
 
     @Test
-    public void testSomeMessages() throws RFXComException, RFXComNotImpException {
+    public void testSomeMessages() throws RFXComException, RFXComMessageNotImplementedException {
         testMessage("070301271356ECC0", RFXComUndecodedRFMessage.SubType.ARC, 0x27, "1356ECC0");
     }
 
     @Test(expected = RFXComMessageTooLongException.class)
-    public void testLongMessage() throws RFXComException, RFXComNotImpException {
+    public void testLongMessage() throws RFXComException, RFXComMessageNotImplementedException {
         RFXComUndecodedRFMessage msg = (RFXComUndecodedRFMessage) RFXComMessageFactory
                 .createMessage(PacketType.UNDECODED_RF_MESSAGE);
         msg.subType = RFXComUndecodedRFMessage.SubType.ARC;
@@ -55,5 +56,11 @@ public class RFXComUndecodedRFMessageTest {
         msg.rawPayload = DatatypeConverter
                 .parseHexBinary("000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F2021");
         msg.decodeMessage();
+    }
+
+    @Test(expected = RFXComUnknownValueException.class)
+    public void testUnknownSubTypeMessage() throws RFXComException, RFXComMessageNotImplementedException {
+        RFXComUndecodedRFMessage msg = new RFXComUndecodedRFMessage(
+                DatatypeConverter.parseHexBinary("0703CC271356ECC0"));
     }
 }

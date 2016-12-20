@@ -8,17 +8,26 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
-import org.eclipse.smarthome.core.library.items.*;
-import org.eclipse.smarthome.core.library.types.*;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.smarthome.core.library.items.ContactItem;
+import org.eclipse.smarthome.core.library.items.DimmerItem;
+import org.eclipse.smarthome.core.library.items.NumberItem;
+import org.eclipse.smarthome.core.library.items.RollershutterItem;
+import org.eclipse.smarthome.core.library.items.SwitchItem;
+import org.eclipse.smarthome.core.library.types.DecimalType;
+import org.eclipse.smarthome.core.library.types.IncreaseDecreaseType;
+import org.eclipse.smarthome.core.library.types.OnOffType;
+import org.eclipse.smarthome.core.library.types.OpenClosedType;
+import org.eclipse.smarthome.core.library.types.PercentType;
 import org.eclipse.smarthome.core.types.State;
 import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for lighting5 message.
@@ -39,9 +48,7 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
         AOKE(7),
         RGB_TRC02_2(7),
         EURODOMEST(8),
-        LIVOLO_APPLIANCE(9),
-
-        UNKNOWN(255);
+        LIVOLO_APPLIANCE(9);
 
         private final int subType;
 
@@ -57,14 +64,14 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -88,9 +95,7 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
         SET_LEVEL(16),
         COLOUR_PALETTE(17),
         COLOUR_TONE(18),
-        COLOUR_CYCLE(19),
-
-        UNKNOWN(255);
+        COLOUR_CYCLE(19);
 
         private final int command;
 
@@ -106,14 +111,14 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
             return (byte) command;
         }
 
-        public static Commands fromByte(int input) {
+        public static Commands fromByte(int input) throws RFXComUnknownValueException {
             for (Commands c : Commands.values()) {
                 if (c.command == input) {
                     return c;
                 }
             }
 
-            return Commands.UNKNOWN;
+            throw new RFXComUnknownValueException(Commands.class, String.valueOf(input));
         }
     }
 
@@ -124,10 +129,10 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays
             .asList(RFXComValueSelector.COMMAND, RFXComValueSelector.DIMMING_LEVEL);
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public int sensorId = 0;
     public byte unitCode = 0;
-    public Commands command = Commands.UNKNOWN;
+    public Commands command;
     public byte dimmingLevel = 0;
     public byte signalLevel = 0;
 
@@ -135,7 +140,7 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
         packetType = PacketType.LIGHTING5;
     }
 
-    public RFXComLighting5Message(byte[] data) {
+    public RFXComLighting5Message(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -154,7 +159,7 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
         super.encodeMessage(data);
 
         subType = SubType.fromByte(super.subType);
@@ -391,9 +396,9 @@ public class RFXComLighting5Message extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

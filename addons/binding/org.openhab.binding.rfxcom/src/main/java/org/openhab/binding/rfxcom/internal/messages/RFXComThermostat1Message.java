@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.smarthome.core.library.items.ContactItem;
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -17,9 +20,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for thermostat1 message.
@@ -32,9 +33,7 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
 
     public enum SubType {
         DIGIMAX(0),
-        DIGIMAX_SHORT(1),
-
-        UNKNOWN(255);
+        DIGIMAX_SHORT(1);
 
         private final int subType;
 
@@ -50,14 +49,14 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -66,9 +65,7 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
         NO_STATUS(0),
         DEMAND(1),
         NO_DEMAND(2),
-        INITIALIZING(3),
-
-        UNKNOWN(255);
+        INITIALIZING(3);
 
         private final int status;
 
@@ -84,23 +81,21 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
             return (byte) status;
         }
 
-        public static Status fromByte(int input) {
+        public static Status fromByte(int input) throws RFXComUnknownValueException {
             for (Status contact : Status.values()) {
                 if (contact.status == input) {
                     return contact;
                 }
             }
 
-            return Status.UNKNOWN;
+            throw new RFXComUnknownValueException(Status.class, String.valueOf(input));
         }
     }
 
     /* Operating mode */
     public enum Mode {
         HEATING(0),
-        COOLING(1),
-
-        UNKNOWN(255);
+        COOLING(1);
 
         private final int mode;
 
@@ -116,14 +111,14 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
             return (byte) mode;
         }
 
-        public static Mode fromByte(int input) {
+        public static Mode fromByte(int input) throws RFXComUnknownValueException {
             for (Mode mode : Mode.values()) {
                 if (mode.mode == input) {
                     return mode;
                 }
             }
 
-            return Mode.UNKNOWN;
+            throw new RFXComUnknownValueException(Mode.class, String.valueOf(input));
         }
     }
 
@@ -133,19 +128,19 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
 
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays.asList();
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public int sensorId = 0;
     public byte temperature = 0;
     public byte set = 0;
-    public Mode mode = Mode.UNKNOWN;
-    public Status status = Status.UNKNOWN;
+    public Mode mode;
+    public Status status;
     public byte signalLevel = 0;
 
     public RFXComThermostat1Message() {
         packetType = PacketType.THERMOSTAT1;
     }
 
-    public RFXComThermostat1Message(byte[] data) {
+    public RFXComThermostat1Message(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -166,7 +161,7 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -275,9 +270,9 @@ public class RFXComThermostat1Message extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.StringItem;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -17,9 +20,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for temperature and humidity message.
@@ -41,9 +42,7 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
         TH10(10),
         TH11(11),
         TH12(12),
-        TH13(13),
-
-        UNKNOWN(255);
+        TH13(13);
 
         private final int subType;
 
@@ -59,14 +58,14 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -74,9 +73,7 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
         NORMAL(0),
         COMFORT(1),
         DRY(2),
-        WET(3),
-
-        UNKNOWN(255);
+        WET(3);
 
         private final int humidityStatus;
 
@@ -92,14 +89,14 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
             return (byte) humidityStatus;
         }
 
-        public static HumidityStatus fromByte(int input) {
+        public static HumidityStatus fromByte(int input) throws RFXComUnknownValueException {
             for (HumidityStatus status : HumidityStatus.values()) {
                 if (status.humidityStatus == input) {
                     return status;
                 }
             }
 
-            return HumidityStatus.UNKNOWN;
+            throw new RFXComUnknownValueException(HumidityStatus.class, String.valueOf(input));
         }
     }
 
@@ -109,11 +106,11 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
 
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays.asList();
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public int sensorId = 0;
     public double temperature = 0;
     public byte humidity = 0;
-    public HumidityStatus humidityStatus = HumidityStatus.UNKNOWN;
+    public HumidityStatus humidityStatus;
     public byte signalLevel = 0;
     public byte batteryLevel = 0;
 
@@ -121,7 +118,7 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
         packetType = PacketType.TEMPERATURE_HUMIDITY;
     }
 
-    public RFXComTemperatureHumidityMessage(byte[] data) {
+    public RFXComTemperatureHumidityMessage(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -142,7 +139,7 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -263,9 +260,9 @@ public class RFXComTemperatureHumidityMessage extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 

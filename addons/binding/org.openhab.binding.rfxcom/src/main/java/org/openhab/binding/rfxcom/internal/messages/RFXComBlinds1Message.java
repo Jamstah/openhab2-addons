@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.rfxcom.internal.messages;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.smarthome.core.library.items.NumberItem;
 import org.eclipse.smarthome.core.library.items.RollershutterItem;
 import org.eclipse.smarthome.core.library.types.DecimalType;
@@ -19,9 +22,7 @@ import org.eclipse.smarthome.core.types.Type;
 import org.eclipse.smarthome.core.types.UnDefType;
 import org.openhab.binding.rfxcom.RFXComValueSelector;
 import org.openhab.binding.rfxcom.internal.exceptions.RFXComException;
-
-import java.util.Arrays;
-import java.util.List;
+import org.openhab.binding.rfxcom.internal.exceptions.RFXComUnknownValueException;
 
 /**
  * RFXCOM data class for blinds1 message.
@@ -40,9 +41,7 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
         T5(5), // MEDIA MOUNT have different direction commands than the rest!! Needs to be fixed.
         T6(6),
         T7(7),
-        T8(8), // Chamberlain CS4330
-
-        UNKNOWN(255);
+        T8(8); // Chamberlain CS4330;
 
         private final int subType;
 
@@ -58,14 +57,14 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
             return (byte) subType;
         }
 
-        public static SubType fromByte(int input) {
+        public static SubType fromByte(int input) throws RFXComUnknownValueException {
             for (SubType c : SubType.values()) {
                 if (c.subType == input) {
                     return c;
                 }
             }
 
-            return SubType.UNKNOWN;
+            throw new RFXComUnknownValueException(SubType.class, String.valueOf(input));
         }
     }
 
@@ -77,9 +76,7 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
         SET_LIMIT(4), // YR1326 SET_UPPER_LIMIT(4),
         SET_LOWER_LIMIT(5), // YR1326
         DELETE_LIMITS(6), // YR1326
-        CHANGE_DIRECTON(7), // YR1326
-
-        UNKNOWN(255);
+        CHANGE_DIRECTON(7); // YR1326
 
         private final int command;
 
@@ -95,14 +92,14 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
             return (byte) command;
         }
 
-        public static Commands fromByte(int input) {
+        public static Commands fromByte(int input) throws RFXComUnknownValueException {
             for (Commands c : Commands.values()) {
                 if (c.command == input) {
                     return c;
                 }
             }
 
-            return Commands.UNKNOWN;
+            throw new RFXComUnknownValueException(Commands.class, String.valueOf(input));
         }
     }
 
@@ -112,10 +109,10 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
     private final static List<RFXComValueSelector> supportedOutputValueSelectors = Arrays
             .asList(RFXComValueSelector.SHUTTER);
 
-    public SubType subType = SubType.UNKNOWN;
+    public SubType subType;
     public int sensorId = 0;
     public byte unitCode = 0;
-    public Commands command = Commands.UNKNOWN;
+    public Commands command;
     public byte signalLevel = 0;
     public byte batteryLevel = 0;
 
@@ -123,7 +120,7 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
         packetType = PacketType.BLINDS1;
     }
 
-    public RFXComBlinds1Message(byte[] data) {
+    public RFXComBlinds1Message(byte[] data) throws RFXComException {
         encodeMessage(data);
     }
 
@@ -142,7 +139,7 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
     }
 
     @Override
-    public void encodeMessage(byte[] data) {
+    public void encodeMessage(byte[] data) throws RFXComException {
 
         super.encodeMessage(data);
 
@@ -278,9 +275,9 @@ public class RFXComBlinds1Message extends RFXComBaseMessage {
 
         // try to find sub type by number
         try {
-            return SubType.values()[Integer.parseInt(subType)];
-        } catch (Exception e) {
-            throw new RFXComException("Unknown sub type " + subType);
+            return SubType.fromByte(Integer.parseInt(subType));
+        } catch (NumberFormatException e) {
+            throw new RFXComUnknownValueException(subType);
         }
     }
 
