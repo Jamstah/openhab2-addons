@@ -921,6 +921,31 @@ Raw messages.
         *   RAW_PACKET4
 
 
+### raw - RFXCOM Raw Messages
+
+Raw messages.
+
+#### Channels
+
+| Name       | Channel Type              | Item Type | Remarks     |
+|------------|---------------------------|-----------|-------------|
+| rawMessage | [rawmessage](#channels)   | String    |             |
+| rawPayload | [rawpayload](#channels)   | String    |             |
+
+#### Configuration Options
+
+*   deviceId - Device Id
+    *   Raw items cannot provide a device ID, so this value is always RAW.
+
+*   subType - Sub Type
+    *   Specifies message sub type.
+
+        *   RAW_PACKET1
+        *   RAW_PACKET2
+        *   RAW_PACKET3
+        *   RAW_PACKET4
+
+
 ### rfxsensor - RFXCOM RFXSensor 
 
 A RFXSensor sensor
