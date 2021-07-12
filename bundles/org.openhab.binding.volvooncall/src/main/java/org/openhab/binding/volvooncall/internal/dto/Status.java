@@ -25,7 +25,7 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * The {@link Status} is responsible for storing
- * Door Status informations returned by vehicule status rest answer
+ * Status information returned by vehicle status rest answer
  *
  * @author Gaël L'hopital - Initial contribution
  */
@@ -63,31 +63,31 @@ public class Status extends VocAnswer {
     public String serviceWarningStatus = "";
     private @NonNullByDefault({}) List<Object> bulbFailures;
 
-    public Optional<WindowsStatus> getWindows() {
+    public @NonNullByDefault({}) Optional<WindowsStatus> getWindows() {
         return Optional.ofNullable(windows);
     }
 
-    public Optional<DoorsStatus> getDoors() {
+    public @NonNullByDefault({}) Optional<DoorsStatus> getDoors() {
         return Optional.ofNullable(doors);
     }
 
-    public Optional<TyrePressure> getTyrePressure() {
+    public @NonNullByDefault({}) Optional<TyrePressure> getTyrePressure() {
         return Optional.ofNullable(tyrePressure);
     }
 
-    public Optional<HvBattery> getHvBattery() {
+    public @NonNullByDefault({}) Optional<HvBattery> getHvBattery() {
         return Optional.ofNullable(hvBattery);
     }
 
-    public Optional<Heater> getHeater() {
+    public @NonNullByDefault({}) Optional<Heater> getHeater() {
         return Optional.ofNullable(heater);
     }
 
-    public Optional<OnOffType> getCarLocked() {
+    public @NonNullByDefault({}) Optional<OnOffType> getCarLocked() {
         return Optional.ofNullable(carLocked);
     }
 
-    public Optional<OnOffType> getEngineRunning() {
+    public @NonNullByDefault({}) Optional<OnOffType> getEngineRunning() {
         return Optional.ofNullable(engineRunning);
     }
 
